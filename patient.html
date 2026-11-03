@@ -41,6 +41,28 @@ textarea{min-height:60px;font-size:16px}
 .qr svg{width:100%;max-width:420px;height:auto}
 .big{font-size:18px;text-align:center}
 .err{padding:20px;text-align:center}
+button.card{font:inherit;text-align:left;color:inherit;cursor:pointer;width:100%}
+.exl-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.exl-head b{font-size:19px}
+.exl.isdone{opacity:.7}
+.pill{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--soft);color:var(--good)}
+.pill.run{background:var(--soft);color:var(--accent)}
+.pill.open{background:var(--danger-soft);color:var(--danger)}
+.info{background:var(--sunk);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.info span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.info b{font-size:17px}
+.info p{margin:0;font-size:16px}
+.setrow{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.setrow.ok{flex-direction:row;justify-content:space-between;background:var(--soft);border-color:transparent}
+.setrow.next{flex-direction:row;justify-content:space-between;opacity:.5}
+.setrow.cur{border:2px solid var(--accent)}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.pause{background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.pause span{font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.pause b{font:700 56px Arial,sans-serif;font-variant-numeric:tabular-nums}
+.done-msg{text-align:center;padding:30px 16px}
+.done-msg b{font-size:22px;color:var(--good)}
 </style></head><body>
 <div class="wrap" id="app"><div class="card err">Wird geladen …</div></div>
 <script>/* qrcode-generator 1.4.4, MIT-Lizenz, Kazuhiko Arase */
@@ -2382,58 +2404,107 @@ function progText(x){
   const h=(x.h||[]).filter(v=>v[1]!=null); if(!h.length) return "";
   return `Zuletzt (${dd(h[h.length-1][0])}): ${fk(h[h.length-1][1])} ${x.t==="laufband"?"km/h":"Watt"}`;
 }
-function render(){
-  const rows=D.x.map((x,i)=>{ const r=st.e[i];
-    const inputs = x.t==="k" ? `<div class="grid">
-        <label class="k-wide">Gewicht (kg)<div class="step"><button type="button" data-st="${i}:-2.5" aria-label="2,5 kg weniger">−</button><input class="num" inputmode="decimal" data-f="${i}:kg" value="${esc(r.kg)}"><button type="button" data-st="${i}:2.5" aria-label="2,5 kg mehr">+</button></div></label>
-        <label>Sätze<input class="num" inputmode="numeric" data-f="${i}:sets" value="${esc(r.sets)}"></label>
-        <label style="grid-column:span 2">Wiederholungen<input class="num" data-f="${i}:reps" value="${esc(r.reps)}" placeholder="z. B. 10/10/8"></label></div>
-        ${x.c!=null?`<div class="warn">Höchstens ${fk(x.c)} kg – Vorgabe Ihrer Therapeutin / Ihres Therapeuten.</div>`:""}`
-      : `<div class="grid">${(x.f||[]).map(f=>`<label>${LBL[f]||f}<input class="num" inputmode="decimal" data-f="${i}:c.${f}" value="${esc(r.c?.[f])}"></label>`).join("")}</div>`;
-    const sp=spark(x.h, x.m), pt=progText(x);
-    return `<section class="card ex ${r.done?"":"skip"}" id="ex${i}">
-      <div class="ex-head"><input type="checkbox" data-done="${i}" ${r.done?"checked":""} aria-label="${esc(x.n)} gemacht"><b>${esc(x.n)}</b></div>
-      ${x.t==="k"&&(x.g||x.r)?`<div class="meta">Vorgabe: ${x.g?`<b>${esc(x.g)} kg</b> · `:""}${esc(x.r)}</div>`:""}
-      ${inputs}
+const CAT={"Beinpresse":"Rücken und Becken fest an der Lehne, Füße hüftbreit auf der Platte. Beine strecken, ohne die Knie ganz durchzudrücken. Knie bleiben über den Füßen, nicht nach innen fallen lassen. Langsam zurück bis zur eingestellten Beugung.","Beinpresse einbeinig":"Ein Fuß mittig auf der Platte, anderes Bein locker abgestellt. Becken bleibt gerade auf dem Sitz. Knie zeigt in Richtung zweiter Zeh. Kontrolliert strecken und langsam zurück.","Beinstrecker (Knieextension)":"Kniegelenk auf Höhe der Drehachse des Geräts, Polster oberhalb des Sprunggelenks. Rücken an der Lehne, an den Griffen festhalten. Unterschenkel bis zur eingestellten Grenze strecken, kurz halten, langsam absenken.","Beinbeuger sitzend":"Knie auf Höhe der Drehachse, Oberschenkelpolster fest. Unterschenkel gegen das Polster nach unten-hinten beugen. Becken bleibt auf dem Sitz, kein Hohlkreuz. Langsam zurückführen.","Wadenheben (Wadenmaschine)":"Fußballen auf der Kante, Knie gestreckt aber nicht überstreckt. Fersen so hoch wie möglich anheben, oben kurz halten. Fersen langsam unter die Kante absenken.","Hüftabduktion Kabelzug":"Seitlich zum Kabelzug stehen, Schlaufe am äußeren Fuß, am Gerät festhalten. Rumpf aufrecht, Becken gerade. Bein gestreckt seitlich abspreizen, ohne den Oberkörper zu kippen. Langsam zurück.","Hüftadduktion Kabelzug":"Seitlich zum Kabelzug stehen, Schlaufe am inneren Fuß. Rumpf aufrecht. Bein gestreckt vor dem Standbein vorbei nach innen ziehen. Langsam zurückführen.","Hüftextension Kabelzug":"Mit Blick zum Gerät stehen, Schlaufe am Fuß, festhalten. Bauch leicht anspannen. Bein gestreckt nach hinten führen, ohne ins Hohlkreuz zu gehen. Langsam zurück.","Latzug":"Oberschenkel unter dem Polster fixiert, Stange etwas weiter als schulterbreit greifen. Brust aufrichten, Schultern nach hinten-unten ziehen. Stange vor dem Körper zur oberen Brust ziehen. Langsam nach oben führen.","Rudern sitzend":"Aufrecht sitzen, Brust ggf. am Polster. Griffe zum Bauch ziehen, Ellenbogen nah am Körper, Schulterblätter zusammenführen. Kein Schwung aus dem Rumpf. Langsam nach vorn zurück.","Brustpresse":"Sitzhöhe so, dass die Griffe auf Brusthöhe sind. Rücken an der Lehne, Schultern unten. Griffe nach vorn drücken, Ellenbogen nicht ganz durchstrecken. Langsam zurück, Schultern bleiben an der Lehne.","Schulterpresse":"Rücken an der Lehne, Bauch leicht angespannt. Griffe von Schulterhöhe nach oben drücken, ohne ins Hohlkreuz zu gehen. Ellenbogen nicht ganz durchstrecken. Langsam absenken.","Butterfly reverse":"Brust am Polster, Arme leicht gebeugt nach vorn. Arme in einem Bogen nach hinten-außen führen, Schulterblätter zusammen. Schultern nicht hochziehen. Langsam zurück.","Außenrotation Kabelzug":"Seitlich zum Kabelzug, Ellenbogen 90° gebeugt und am Körper (Handtuchrolle zwischen Arm und Rumpf). Unterarm nach außen drehen, Ellenbogen bleibt am Körper. Langsam zurück.","Innenrotation Kabelzug":"Seitlich zum Kabelzug, Ellenbogen 90° gebeugt und am Körper. Unterarm vor den Bauch nach innen drehen, Ellenbogen bleibt am Körper. Langsam zurück.","Rückenstrecker":"Becken und Oberschenkel fixiert, Arme vor der Brust verschränkt. Aus leichter Vorneigung den Oberkörper aufrichten bis zur geraden Linie, nicht überstrecken. Langsam zurück.","Bauchmaschine":"Aufrecht sitzen, Polster vor der Brust oder Griffe fassen. Oberkörper Wirbel für Wirbel nach vorn einrollen, ausatmen. Nicht mit den Armen ziehen. Langsam aufrichten.","Rumpfrotation":"Becken fixiert, aufrecht sitzen. Oberkörper gleichmäßig zur Seite drehen bis zur eingestellten Grenze. Kopf dreht mit. Langsam zurück zur Mitte.","Bizepscurl Kabelzug":"Aufrecht stehen, Ellenbogen am Körper. Griff durch Beugen im Ellenbogen nach oben führen, Schultern bleiben ruhig. Langsam strecken, ohne Schwung.","Trizepsdrücken Kabelzug":"Aufrecht stehen, Ellenbogen am Körper. Griff nach unten drücken, bis die Arme gestreckt sind. Oberarme bewegen sich nicht. Langsam zurück bis 90°.","Wadenheben sitzend":"Fußballen auf der Kante, Polster auf den Oberschenkeln knapp über dem Knie. Fersen so hoch wie möglich anheben, oben kurz halten, langsam tief absenken.","Kniebeuge Multipresse":"Stange auf dem oberen Rücken, Füße hüftbreit leicht vor dem Körper. Gesäß nach hinten-unten bis zur freigegebenen Tiefe, Knie über den Füßen, Rücken gerade. Über die ganze Fußsohle hochdrücken.","Ausfallschritt Multipresse":"Schrittstellung, Stange auf dem oberen Rücken. Hinteres Knie senkrecht Richtung Boden absenken, vorderes Knie bleibt über dem Fuß. Oberkörper aufrecht, über die vordere Ferse hochdrücken.","Step-up":"Ganzen Fuß auf die Box stellen. Über das vordere Bein aufsteigen, ohne sich mit dem hinteren abzustoßen. Knie zeigt in Richtung zweiter Zeh. Langsam und kontrolliert absteigen.","Kreuzheben Kabelzug / Trapbar":"Hüftbreit stehen, Griff dicht am Körper. Rücken gerade, aus der Hüfte nach vorne neigen und Knie leicht beugen. Über Hüft- und Kniestreckung aufrichten, Schulterblätter hinten-unten.","Hip Thrust (Gerät)":"Oberer Rücken an der Bank, Polster auf dem Becken, Füße hüftbreit. Becken anheben bis Oberkörper und Oberschenkel eine Linie bilden, Gesäß oben anspannen. Kein Hohlkreuz, langsam absenken.","Abduktorenmaschine":"Aufrecht sitzen, Rücken an der Lehne, Polster außen an den Knien. Beine gleichmäßig nach außen drücken, kurz halten, langsam zurückführen.","Adduktorenmaschine":"Aufrecht sitzen, Polster innen an den Knien, Bewegungsumfang schmerzfrei einstellen. Beine gleichmäßig zusammendrücken, langsam wieder öffnen.","Glute Kickback (Gerät)":"Unterarme bzw. Brust am Polster, Fuß an der Platte. Bein nach hinten-oben strecken, Bauch angespannt, kein Hohlkreuz. Langsam zurück.","Hüftbeugung Kabelzug":"Mit dem Rücken zum Kabelzug stehen, Schlaufe am Fuß, festhalten. Knie gestreckt oder gebeugt nach vorne-oben führen, Rumpf bleibt aufrecht. Langsam zurück.","Rudern Kabelzug einarmig":"Schrittstellung, freie Hand abstützen. Griff zur Hüfte ziehen, Ellenbogen nah am Körper, Schulterblatt nach hinten-unten. Kein Mitdrehen des Rumpfes. Langsam nach vorne.","Latzug eng / neutral":"Oberschenkel fixiert, enger Neutralgriff. Brust aufrichten, Griff zur oberen Brust ziehen, Ellenbogen nah am Körper. Langsam nach oben führen.","Klimmzug assistiert":"Knie auf dem Polster, Griff etwas weiter als schulterbreit. Schulterblätter zuerst nach unten ziehen, dann bis Kinn über Griffhöhe ziehen. Langsam ablassen.","Butterfly":"Rücken an der Lehne, Arme leicht gebeugt auf Schulterhöhe. Arme vor der Brust im Bogen zusammenführen, Schultern bleiben unten. Langsam öffnen bis zur eingestellten Grenze.","Brustpresse schräg":"Sitzhöhe so, dass die Griffe auf Höhe der oberen Brust sind. Schräg nach oben-vorne drücken, Ellenbogen nicht ganz durchstrecken. Langsam zurück.","Pull-over Kabelzug":"Vor dem Kabelzug stehen, Arme fast gestreckt oben am Seil. Arme im Bogen bis zu den Oberschenkeln ziehen, Rumpf stabil. Langsam zurück nach oben.","Face Pull":"Seil auf Augenhöhe, Griff mit Daumen nach hinten. Seil Richtung Gesicht ziehen, Ellenbogen hoch und nach außen, Hände enden neben den Ohren. Schulterblätter zusammen, langsam zurück.","Seitheben Kabelzug":"Seitlich zum Kabelzug, Griff in der körperfernen Hand. Arm leicht gebeugt seitlich bis Schulterhöhe anheben, Schulter nicht hochziehen. Langsam absenken.","Frontheben Kabelzug":"Rücken zum Kabelzug, Griff neben dem Körper. Arm leicht gebeugt nach vorne bis Schulterhöhe heben, Rumpf ruhig. Langsam absenken.","Schulterflexion Kabelzug":"Rücken zum Kabelzug, Arm gestreckt. Arm im schmerzfreien Bereich nach vorne-oben führen, Schulter bleibt unten. Langsam zurück.","Scapula-Depression Latzug":"Arme gestreckt an der Stange, Ellenbogen bleiben gestreckt. Nur die Schulterblätter nach hinten-unten ziehen, kurz halten, langsam nach oben lassen.","Außenrotation 90° Abduktion":"Oberarm auf Schulterhöhe seitlich, Ellenbogen 90° gebeugt, Kabel von vorne. Unterarm nach oben-hinten drehen, Oberarm bleibt auf Höhe. Langsam zurück.","Rückenstrecker 45° (Hyperextension)":"Hüfte knapp über dem Polster, Füße fixiert. Mit geradem Rücken aus der Hüfte nach vorne beugen und bis zur Körperlinie aufrichten, nicht überstrecken.","Pallof Press":"Seitlich zum Kabelzug, Griff mit beiden Händen vor der Brust. Arme nach vorne strecken, dem Zug zur Seite nicht nachgeben, Becken bleibt gerade. Kurz halten, zurück zur Brust.","Holzhacker Kabelzug":"Seitlich zum Kabelzug, Griff oben mit beiden Händen. Diagonal nach unten zur gegenüberliegenden Hüfte ziehen, Rotation aus dem Brustkorb, Becken stabil. Langsam zurück.","Seitbeuge Kabelzug":"Seitlich zum Kabelzug, Griff in der körpernahen Hand. Oberkörper zur Gegenseite aufrichten und leicht neigen, nicht nach vorne kippen. Langsam zurück.","Bizepsmaschine":"Oberarme auf dem Polster, Ellenbogen auf Höhe der Drehachse. Griffe zur Schulter beugen, Schultern bleiben ruhig. Langsam strecken.","Trizepsmaschine / Dips-Maschine":"Aufrecht sitzen, Ellenbogen nah am Körper. Griffe nach unten drücken bis die Arme gestreckt sind, Schultern bleiben unten. Langsam zurück bis 90°.","Handgelenk Flexion / Extension":"Unterarm auf dem Oberschenkel oder Polster abgelegt, Hand über der Kante. Handgelenk langsam beugen bzw. strecken, Unterarm bleibt liegen.","Pronation / Supination":"Unterarm abgelegt, Ellenbogen 90° gebeugt, Stab oder Hantel in der Hand. Unterarm langsam nach innen und außen drehen, Ellenbogen bleibt am Körper.","Fahrradergometer":"Sattelhöhe so, dass das Knie unten fast gestreckt ist. Gleichmäßig treten, Belastung nach Vorgabe (Watt / Puls). Zum Aufwärmen 5–10 Minuten.","Crosstrainer":"Aufrecht stehen, ganze Fußsohle auf den Pedalen. Gleichmäßige, runde Bewegung, Arme schwingen mit. Belastung nach Vorgabe.","Laufband":"Aufrecht gehen, nicht an den Griffen festhalten wenn möglich. Tempo und Steigung nach Vorgabe, bei Unsicherheit Sicherheitsleine anlegen.","Oberkörperergometer":"Sitzhöhe so, dass die Kurbel auf Schulterhöhe ist. Gleichmäßig kurbeln, Rumpf ruhig. Belastung nach Vorgabe."};
+function ausf(x){ return x.a || CAT[x.n] || ""; }
+function nSets(x){ const n=parseInt(String(x.s??"").match(/\d+/)?.[0]||"3",10); return Math.min(Math.max(n,1),10); }
+function repsFor(x,j){ const parts=String(x.w??"").split("/").map(s=>s.trim()).filter(Boolean); return parts.length>1?(parts[j]??parts[parts.length-1]):(parts[0]||""); }
+function kgFor(x,j){ return x.st&&x.st[j]!=null ? fk(x.st[j]) : (x.k??""); }
+function initRow(x){ return x.t==="k" ? {sets:[], cur:{kg:kgFor(x,0), reps:repsFor(x,0)}, state:"offen"} : {c:{...(x.p||{})}, state:"offen"}; }
+const sc=v=>`<option value="">–</option>`+[...Array(11).keys()].map(n=>`<option ${String(n)===String(v)?"selected":""}>${n}</option>`).join("");
+let tick=null;
+function render(){ clearInterval(tick); tick=null; if(st.view!=null && D.x[st.view]) return renderEx(st.view); renderList(); }
+function stateLbl(x,r){ if(r.state==="fertig") return `<span class="pill ok">✓ erledigt</span>`; if(r.state==="skip") return `<span class="pill">übersprungen</span>`; if(x.t==="k"&&r.sets.length) return `<span class="pill run">${r.sets.length} von ${nSets(x)} Sätzen</span>`; return `<span class="pill open">offen</span>`; }
+function renderList(){
+  const done=st.e.filter(r=>r.state==="fertig"||r.state==="skip").length;
+  const rows=D.x.map((x,i)=>{ const r=st.e[i], sp=spark(x.h,x.m), pt=progText(x);
+    return `<button type="button" class="card exl ${r.state==="fertig"?"isdone":""}" data-open="${i}">
+      <div class="exl-head"><b>${esc(x.n)}</b>${stateLbl(x,r)}</div>
+      ${x.t==="k"?`<div class="meta">${x.g?`<b>${esc(x.g)} kg</b> · `:""}${esc(x.r||"")}</div>`:`<div class="meta">Ausdauer</div>`}
       ${sp||pt?`<div class="prog">${sp}<span>${pt}</span></div>`:""}
-    </section>`; }).join("");
-  const sc=v=>`<option value="">–</option>`+[...Array(11).keys()].map(n=>`<option ${String(n)===String(v)?"selected":""}>${n}</option>`).join("");
+    </button>`; }).join("");
   $("#app").innerHTML=`<header><h1>Mein KGG-Training</h1><p class="sub">${esc(D.pr||"")} · ${dd(D.d.slice(5))}${D.d.slice(0,4)}</p></header>
-    <p class="sub">Bitte tragen Sie ein, was Sie heute gemacht haben. Nicht gemachte Übungen abhaken. Zum Schluss zeigen Sie den Code Ihrer Therapeutin / Ihrem Therapeuten.</p>
+    <p class="sub">Wählen Sie eine Übung aus. Sie sehen dann, wie das Gerät eingestellt wird und wie die Übung geht. ${done} von ${D.x.length} Übungen erledigt.</p>
     ${rows}
     <section class="card"><h2>Wie war es heute?</h2>
       <div class="two"><label>Anstrengung 0–10<select data-f="b">${sc(st.b)}</select></label><label>Schmerz 0–10<select data-f="z">${sc(st.z)}</select></label></div>
       <label>Bemerkung (freiwillig)<textarea data-f="n" placeholder="z. B. Knie hat leicht gezogen">${esc(st.n)}</textarea></label>
     </section>
-    <button class="btn" type="button" id="done">Fertig – Code anzeigen</button>
+    <button class="btn" type="button" id="done">Training beenden – Code anzeigen</button>
     <p class="sub">Ihre Eingaben werden nicht ins Internet gesendet. Sie bleiben auf diesem Handy, bis der Code gescannt wird.</p>`;
 }
+function info(x){ const a=ausf(x);
+  return `${x.e?`<div class="info"><span>Einstellung am Gerät</span><b>${esc(x.e)}</b></div>`:""}
+    ${a?`<div class="info"><span>So geht die Übung</span><p>${esc(a)}</p></div>`:""}
+    ${x.t==="k"?`<div class="info"><span>Ihre Vorgabe</span><b>${x.g?esc(x.g)+" kg · ":""}${esc(x.r||"")}</b></div>`:""}
+    ${x.c!=null?`<div class="warn">Höchstens ${fk(x.c)} kg – Vorgabe Ihrer Therapeutin / Ihres Therapeuten.</div>`:""}`; }
+function renderEx(i){
+  const x=D.x[i], r=st.e[i];
+  let body="";
+  if(x.t!=="k"){
+    body=`<section class="card">${info(x)}<div class="grid">${(x.f||[]).map(f=>`<label>${LBL[f]||f}<input class="num" inputmode="decimal" data-f="${i}:c.${f}" value="${esc(r.c?.[f])}"></label>`).join("")}</div>
+      <button class="btn" type="button" data-cfin="${i}">✓ Fertig</button></section>`;
+  } else {
+    const n=nSets(x), j=r.sets.length, pausing=st.pause && st.pause.i===i && st.pause.end>Date.now();
+    const doneRows=r.sets.map((s,k)=>`<div class="setrow ok"><b>✓ Satz ${k+1}</b><span>${s.kg!==""?esc(s.kg)+" kg":"–"} × ${esc(s.reps||"–")}</span></div>`).join("");
+    const cur = j<n ? (pausing ? `<div class="pause"><span>Pause</span><b id="pz">–</b><small>Danach geht es mit Satz ${j+1} von ${n} weiter.</small></div>`
+      : `<div class="setrow cur"><b>Satz ${j+1} von ${n}</b>
+        <div class="grid2"><label>Gewicht (kg)<div class="step"><button type="button" data-st="${i}:-2.5" aria-label="2,5 kg weniger">−</button><input class="num" inputmode="decimal" data-f="${i}:kg" value="${esc(r.cur.kg)}"><button type="button" data-st="${i}:2.5" aria-label="2,5 kg mehr">+</button></div></label>
+        <label>Wiederholungen<input class="num" inputmode="numeric" data-f="${i}:reps" value="${esc(r.cur.reps)}"></label></div>
+        <button class="btn" type="button" data-setok="${i}">✓ Satz ${j+1} fertig</button>
+        <p class="sub">Werte stimmen? Dann einfach abhaken. Sonst vorher ändern.</p></div>`) : "";
+    const rest=Array.from({length:Math.max(0,n-j-1)},(_,k)=>`<div class="setrow next"><b>Satz ${j+k+2}</b><span>${esc(kgFor(x,j+k+1))}${kgFor(x,j+k+1)!==""?" kg":""}</span></div>`).join("");
+    body=`<section class="card">${info(x)}</section><section class="card"><h2>Ihre Sätze</h2>${doneRows}${cur}${pausing?"":rest}</section>`;
+  }
+  $("#app").innerHTML=`<button class="btn sec" type="button" id="toList">← Alle Übungen</button>
+    <header><h1>${esc(x.n)}</h1></header>${body}
+    ${r.state!=="fertig"?`<button class="btn sec" type="button" data-skip="${i}">Übung heute auslassen</button>`:""}`;
+  if(st.pause && st.pause.i===i) startTick();
+}
+function startTick(){ clearInterval(tick); const upd=()=>{ const left=Math.max(0,Math.ceil((st.pause.end-Date.now())/1000)), el=$("#pz");
+    if(left<=0){ clearInterval(tick); tick=null; st.pause=null; save(); try{ navigator.vibrate?.([300,150,300]); }catch(e){} render(); return; }
+    if(el) el.textContent=Math.floor(left/60)+":"+String(left%60).padStart(2,"0"); }; upd(); tick=setInterval(upd,250); }
+function finishEx(i){ st.e[i].state="fertig"; st.view=null; st.pause=null; save();
+  $("#app").innerHTML=`<section class="card done-msg"><b>✓ ${esc(D.x[i].n)} geschafft!</b><p>Super. Jetzt die nächste Übung aussuchen.</p></section>`;
+  setTimeout(()=>{ window.scrollTo(0,0); render(); }, 1400); }
 async function renderQR(){
-  const out={v:1,s:D.s,e:st.e.map((r,i)=>D.x[i].t==="k"?[i,r.done?1:0,r.kg,r.sets,r.reps]:[i,r.done?1:0,r.c||{}]),b:st.b,z:st.z,n:(st.n||"").slice(0,300)};
+  clearInterval(tick);
+  const out={v:1,s:D.s,e:st.e.map((r,i)=>{ const x=D.x[i];
+    if(x.t!=="k") return [i, r.state==="fertig"?1:0, r.c||{}];
+    const kgs=r.sets.map(s=>num(s.kg)).filter(v=>!isNaN(v)), reps=r.sets.map(s=>String(s.reps||"").trim()).filter(Boolean);
+    const allSame=reps.length && reps.every(v=>v===reps[0]);
+    return [i, r.sets.length?1:0, kgs.length?fk(Math.max(...kgs)):"", r.sets.length?String(r.sets.length):"", allSame?reps[0]:reps.join("/")]; }),b:st.b,z:st.z,n:(st.n||"").slice(0,300)};
   const raw=new TextEncoder().encode(JSON.stringify(out)); let txt="KGG1:"+bytesToB64url(raw);
   if("CompressionStream" in window){ try{ const cs=new CompressionStream("deflate-raw"); const buf=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(cs)).arrayBuffer()); const z="KGG2:"+bytesToB64url(buf); if(z.length<txt.length) txt=z; }catch(e){} }
   const q=qrcode(0,"M"); q.addData(txt,"Byte"); q.make();
   $("#app").innerHTML=`<header><h1>Fast geschafft</h1></header>
-    <p class="big">Bitte zeigen Sie diesen Code Ihrer Therapeutin / Ihrem Therapeuten. Das Tablet scannt ihn.</p>
+    <p class="big">Bitte zeigen Sie diesen Code Ihrer Therapeutin / Ihrem Therapeuten. Das Tablet liest ihn ein.</p>
     <div class="qr">${q.createSvgTag({cellSize:6,margin:4,scalable:true})}</div>
-    <button class="btn sec" type="button" id="back">Zurück und ändern</button>`;
+    <button class="btn sec" type="button" id="back">Zurück</button>`;
 }
+function alertMax(i){ const x=D.x[i]; const w=document.createElement("div"); w.className="warn"; w.textContent=`Mehr als ${fk(x.c)} kg ist für Sie im Moment nicht erlaubt.`; document.querySelector(".setrow.cur")?.appendChild(w); }
 document.addEventListener("input",e=>{ const f=e.target.dataset.f; if(!f||!st) return;
   if(f==="b"||f==="z"||f==="n"){ st[f]=e.target.value; save(); return; }
-  const [i,k]=f.split(":"), r=st.e[Number(i)]; if(k.startsWith("c.")){ (r.c ||= {})[k.slice(2)]=e.target.value; } else r[k]=e.target.value; save(); });
+  const [i,k]=f.split(":"), r=st.e[Number(i)]; if(k.startsWith("c.")) (r.c ||= {})[k.slice(2)]=e.target.value; else r.cur[k]=e.target.value; save(); });
 document.addEventListener("change",e=>{ const f=e.target.dataset.f; if(f&&/:kg$/.test(f)){ const i=Number(f.split(":")[0]), x=D.x[i], v=num(e.target.value);
-    if(x.c!=null && !isNaN(v) && v>x.c){ e.target.value=fk(x.c); st.e[i].kg=e.target.value; save(); alertBox(i); } }
-  const d=e.target.dataset.done; if(d!=null){ st.e[Number(d)].done=e.target.checked; save(); $("#ex"+d)?.classList.toggle("skip",!e.target.checked); } });
-function alertBox(i){ const c=$("#ex"+i); if(!c) return; let w=c.querySelector(".warn.hit"); if(!w){ w=document.createElement("div"); w.className="warn hit"; c.appendChild(w); } w.textContent=`Mehr als ${fk(D.x[i].c)} kg ist für Sie im Moment nicht erlaubt.`; }
-document.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
-  if(b.dataset.st){ const [i,s]=b.dataset.st.split(":"), x=D.x[Number(i)], r=st.e[Number(i)]; let v=num(r.kg); if(isNaN(v)) v=0; v=Math.max(0,Math.round((v+Number(s))*2)/2); if(x.c!=null&&v>x.c){ v=x.c; alertBox(Number(i)); } r.kg=fk(v); save(); const inp=document.querySelector(`[data-f="${i}:kg"]`); if(inp) inp.value=r.kg; return; }
-  if(b.id==="done"){ renderQR().then(()=>window.scrollTo(0,0)); return; }
+  if(x.c!=null && !isNaN(v) && v>x.c){ e.target.value=fk(x.c); st.e[i].cur.kg=e.target.value; save(); alertMax(i); } } });
+document.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b||!st) return;
+  if(b.dataset.open!=null){ st.view=Number(b.dataset.open); save(); window.scrollTo(0,0); render(); return; }
+  if(b.id==="toList"){ st.view=null; save(); window.scrollTo(0,0); render(); return; }
+  if(b.dataset.st){ const [i,s]=b.dataset.st.split(":"), x=D.x[Number(i)], r=st.e[Number(i)]; let v=num(r.cur.kg); if(isNaN(v)) v=0; v=Math.max(0,Math.round((v+Number(s))*2)/2); if(x.c!=null&&v>x.c){ v=x.c; alertMax(Number(i)); } r.cur.kg=fk(v); save(); const inp=document.querySelector(`[data-f="${i}:kg"]`); if(inp) inp.value=r.cur.kg; return; }
+  if(b.dataset.setok!=null){ const i=Number(b.dataset.setok), x=D.x[i], r=st.e[i]; let kg=num(r.cur.kg); if(x.c!=null&&!isNaN(kg)&&kg>x.c) kg=x.c;
+    r.sets.push({kg:isNaN(kg)?"":fk(kg), reps:r.cur.reps}); r.state="läuft"; const j=r.sets.length, n=nSets(x);
+    if(j>=n){ finishEx(i); return; }
+    r.cur={kg:x.st?kgFor(x,j):(isNaN(kg)?"":fk(kg)), reps:repsFor(x,j)};
+    if(x.ps>0){ st.pause={i, end:Date.now()+x.ps*1000}; } save(); window.scrollTo(0,0); render(); return; }
+  if(b.dataset.cfin!=null){ finishEx(Number(b.dataset.cfin)); return; }
+  if(b.dataset.skip!=null){ const i=Number(b.dataset.skip); st.e[i].state="skip"; st.view=null; st.pause=null; save(); window.scrollTo(0,0); render(); return; }
+  if(b.id==="done"){ const open=st.e.filter(r=>r.state==="offen").length; if(open && !b.dataset.sure){ b.dataset.sure="1"; b.textContent=`Noch ${open} Übung${open>1?"en":""} offen – trotzdem beenden?`; return; } renderQR().then(()=>window.scrollTo(0,0)); return; }
   if(b.id==="back"){ render(); return; } });
 (async()=>{
   try{
     const m=location.hash.match(/[#&]d=([^&]+)/), m2=location.hash.match(/^#k([zj])([a-z2-7]+)$/);
     if(m) D=await decode(decodeURIComponent(m[1])); else if(m2) D=await decodeB32(m2[1], m2[2]); else throw new Error("kein Code"); if(!D||D.v!==1||!Array.isArray(D.x)) throw new Error("ungültig");
-    st=load()||{e:D.x.map(x=>x.t==="k"?{done:true,kg:x.k??"",sets:x.s??"",reps:x.w??""}:{done:true,c:{...(x.p||{})}}),b:"",z:"",n:""};
+    st=load(); if(!st||!st.e||!st.e[0]||!("state" in st.e[0])) st={e:D.x.map(initRow),b:"",z:"",n:"",view:null,pause:null};
     render();
   }catch(e){ $("#app").innerHTML=`<div class="card err"><h2>Code nicht lesbar</h2><p>Bitte scannen Sie den QR-Code am Tablet noch einmal${String(e.message)==="alt"?" oder aktualisieren Sie den Browser auf Ihrem Handy":""}.</p></div>`; }
 })();
