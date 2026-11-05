@@ -2478,6 +2478,7 @@ async function renderQR(){
     return [i, r.sets.length?1:0, kgs.length?fk(Math.max(...kgs)):"", r.sets.length?String(r.sets.length):"", allSame?reps[0]:reps.join("/")]; }),b:st.b,z:st.z,n:(st.n||"").slice(0,300)};
   const raw=new TextEncoder().encode(JSON.stringify(out)); let txt="KGG1:"+bytesToB64url(raw);
   if("CompressionStream" in window){ try{ const cs=new CompressionStream("deflate-raw"); const buf=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(cs)).arrayBuffer()); const z="KGG2:"+bytesToB64url(buf); if(z.length<txt.length) txt=z; }catch(e){} }
+  if(typeof D.r==="string" && /^https?:\/\/[^\s#]+$/.test(D.r)) txt=D.r+"#a="+txt;
   const q=qrcode(0,"L"); q.addData(txt,"Byte"); q.make();
   const rows=out.e.map(e=>{ const x=D.x[e[0]]; if(!x) return ""; const r=st.e[e[0]];
     const val = x.t!=="k" ? Object.entries(e[2]||{}).filter(([k,v])=>String(v).trim()).map(([k,v])=>`${esc(k)} ${esc(v)}`).join(", ") : (e[1]?`${e[2]?esc(e[2])+" kg · ":""}${e[3]} Sätze${e[4]?" · "+esc(e[4])+" Wdh.":""}`:"");
