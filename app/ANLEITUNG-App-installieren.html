@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KGG-App installieren</title>
+<style>
+:root{--ink:#16232B;--muted:#5A6A73;--accent:#0E6B66;--soft:#DCEEEC;--line:#D5DCDF;--warn:#9A5B00;--warn-soft:#FFF1D6}
+body{margin:0;background:#F3F5F6;color:var(--ink);font:16px/1.55 Verdana,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:28px 18px 60px}
+h1{font:700 28px Arial,sans-serif;margin:0 0 4px}
+h2{font:700 21px Arial,sans-serif;margin:30px 0 8px;color:var(--accent)}
+p.lead{color:var(--muted);margin:0 0 18px}
+li{margin:7px 0}
+code{background:#E9EDEF;border-radius:4px;padding:1px 6px;font-family:Consolas,monospace;font-size:14px}
+.tip{background:var(--soft);border-radius:8px;padding:10px 14px}
+.warn{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 14px}
+</style></head><body><main>
+<h1>KGG Trainingspläne als App auf dem Tablet</h1>
+<p class="lead">Die App liegt danach auf dem Startbildschirm, startet im Vollbild und funktioniert auch ohne Internet. Alle Patientendaten bleiben nur auf dem Tablet.</p>
+
+<p class="tip"><b>Warum der Umweg über eine Internet-Adresse?</b> Android installiert Web-Apps nur von einer sicheren https-Adresse. Dort liegt aber nur das Programm (diese Dateien), keine Patientendaten. Die Daten speichert die App ausschließlich im Speicher des Tablets.</p>
+
+<h2>Schritt 1: Programm online stellen (einmalig, am PC)</h2>
+<p><b>Möglichkeit A – eigene Praxis-Website (am besten für den Datenschutz):</b> Wenn die Praxis eine Website mit https hat, den Inhalt dieses Ordners in einen Unterordner hochladen, z. B. <code>https://www.eure-praxis.de/kgg/</code>. Das kann meist der Betreuer der Website in wenigen Minuten erledigen. Wichtig: alle Dateien hochladen, auch <code>patient.html</code>, <code>sw.js</code> und <code>manifest.webmanifest</code>.</p>
+<p><b>Möglichkeit B – kostenlos bei Netlify:</b></p>
+<ol>
+<li>Am PC <code>app.netlify.com</code> öffnen und ein kostenloses Konto anlegen (z. B. mit der Praxis-E-Mail).</li>
+<li>„Add new site“ bzw. „Projekt hinzufügen“ → <b>„Deploy manually“</b> wählen.</li>
+<li>Den <b>entpackten Ordner „KGG-App“</b> in das Feld ziehen. Nach einigen Sekunden erscheint eine Adresse wie <code>https://irgendwas-123.netlify.app</code>.</li>
+<li>Unter „Site configuration“ → „Change site name“ einen Namen wählen, z. B. <code>kgg-praxis-hueck</code>. Die Adresse lautet dann <code>https://kgg-praxis-hueck.netlify.app</code>.</li>
+</ol>
+<p class="warn">Netlify ist ein US-Anbieter. Er bekommt keine Patientendaten, sieht aber beim Laden der App die IP-Adresse des Tablets. Für den Dauerbetrieb ist Möglichkeit A (Website bei einem deutschen Anbieter) die sauberere Lösung. Zum Ausprobieren ist Netlify in Ordnung.</p>
+
+<h2>Schritt 2: Auf dem Tablet installieren</h2>
+<ol>
+<li>Auf dem Xiaomi-Tablet <b>Chrome</b> öffnen und die Adresse aus Schritt 1 eingeben.</li>
+<li>Chrome zeigt unten „App installieren“ an. Falls nicht: Menü <b>⋮</b> → <b>„App installieren“</b> (oder „Zum Startbildschirm hinzufügen“ → „Installieren“).</li>
+<li>Auf dem Startbildschirm erscheint das Symbol <b>„KGG“</b> mit der Hantel. Ab jetzt die App immer darüber öffnen. Sie startet quer im Vollbild.</li>
+<li>Beim ersten Start sich selbst als Teammitglied anlegen (Kürzel + PIN) oder unten <b>„Sicherung einspielen“</b>, um Daten aus der Claude-Version zu übernehmen.</li>
+</ol>
+<p class="tip">Tipp für mehr Platz: Am Tablet <b>Einstellungen → Startbildschirm → Systemnavigation → „Gesten“</b> wählen, dann verschwinden die Tasten unten.</p>
+
+<h2>Patienten tragen selbst ein (QR-Code)</h2>
+<ol>
+<li>Auf der Trainingsfläche in der Spalte des Patienten auf <b>„QR“</b> tippen. Der Patient scannt den Code mit der Handy-Kamera.</li>
+<li>Auf dem Handy sieht er nur seine Übungen, die Vorgaben und seinen Fortschritt, kein Name. Er trägt ein und tippt auf <b>„Fertig – Code anzeigen“</b>.</li>
+<li>Am Tablet auf <b>„Antwort scannen“</b> tippen und den Code vom Handy vor die Tablet-Kamera halten. Beim ersten Mal fragt Chrome nach der Kamera: <b>Zulassen</b>.</li>
+<li><b>Oder mit der Scan-App des Tablets</b> (z. B. „Scanner“ oder Google Lens): Code scannen und den angezeigten Link antippen. Die KGG-App öffnet sich und übernimmt die Werte, nach der Anmeldung mit PIN.</li>
+<li>Die Werte stehen in der Spalte, markiert mit „Werte vom Patienten übernommen“. Prüfen, bei Bedarf ändern, dann <b>„Training speichern“</b>.</li>
+</ol>
+<p class="tip">Das Handy lädt beim Scannen nur das Formular von eurer App-Adresse (dafür braucht es kurz Internet, z. B. mobile Daten). Die Trainingswerte selbst stecken im QR-Code und gehen nicht übers Internet. Gewichtsgrenzen aus den Kontraindikationen gelten auch auf dem Handy. Eintragen direkt am Tablet geht weiterhin jederzeit.</p>
+
+<h2>Wichtig im Alltag</h2>
+<ul>
+<li><b>Daten nur auf diesem Tablet.</b> Andere Geräte sehen sie nicht. Für mehrere Geräte gleichzeitig ist der Praxis-Server gedacht.</li>
+<li><b>Sicherung:</b> Mindestens einmal pro Woche unter „Praxis &amp; Datenschutz“ → „Sicherung herunterladen“ und die Datei auf den Praxis-PC kopieren. Die App erinnert nach 7 Tagen.</li>
+<li><b>Nicht löschen:</b> Die App nicht deinstallieren und in Chrome nicht „Website-Daten löschen“, sonst sind die Daten weg (außer der letzten Sicherung).</li>
+<li><b>Updates:</b> Bekommt ihr eine neue Version, einfach den neuen Ordner an derselben Stelle hochladen. Das Tablet übernimmt sie beim übernächsten Öffnen der App. Die Daten bleiben erhalten.</li>
+</ul>
+</main></body></html>
